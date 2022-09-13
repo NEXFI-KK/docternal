@@ -1,4 +1,4 @@
-# Docternal
+# Docternal (WIP)
 
 Docternal is an internal documentation hosting server for hosting internal/customer facing documentation.
 
