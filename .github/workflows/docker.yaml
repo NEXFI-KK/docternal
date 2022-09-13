@@ -1,0 +1,28 @@
+name: Build Docker images
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      
+      - name: Build and push Docker SDK image
+        uses: docker/build-push-action@v3
+        with:
+          context: ${{ github.workspace }}
+          push: true
+          tags: |
+            ghcr.io/nexfi-kk/docternal:latest
