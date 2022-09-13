@@ -4,6 +4,10 @@ import { S3Client, ListObjectsV2Command, _Object, CommonPrefix } from '@aws-sdk/
 import { ensureLoggedIn } from 'connect-ensure-login'
 
 export function initAPI(app: Application, s3Client: S3Client, bucket: string, rootPath: string) {
+  app.get('/api/healthcheck', (req: Request, res: Response) => {
+    res.status(200).json({ message: 'OK' })
+  })
+
   app.get('/api/:appName/languages', [ensureLoggedIn()], async (req: Request, res: Response) => {
     const ret = await s3Client.send(new ListObjectsV2Command({
       Bucket: bucket,
