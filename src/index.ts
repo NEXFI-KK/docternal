@@ -10,6 +10,8 @@ import initAuth from './auth'
 import { initAPI } from './api'
 import { ensureLoggedIn } from 'connect-ensure-login'
 
+console.log('Docternal starting up...')
+
 const app = express()
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
