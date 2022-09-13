@@ -1,0 +1,12 @@
+http
+  head
+    include includes/head.pug
+    title NEXFI Docs - Index
+  body
+    div.container.mt-2
+      header 
+        h2 Index
+      section
+        div.list-group
+          each site in sites
+            a.list-group-item.list-group-item-action(href=site.href) #{site.title}

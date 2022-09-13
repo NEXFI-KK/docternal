@@ -1,0 +1,22 @@
+http
+  head
+    include includes/head.pug
+    title NEXFI Docs - Login
+  body
+    div.container.mt-2
+      header 
+        h2 Login
+      section
+        if withLocalLogin
+          form(action='/login/password' method='POST')
+            div.mb-3
+              label.form-label Username
+              input.form-control(name='username' type='text')
+            div.mb-3
+              label.form-label Password
+              input.form-control(name='password' type='password')
+            button.btn.btn-primary(type='submit') Login
+        if withGoogleLogin
+          a(href='/auth/google') Login with Google
+
+

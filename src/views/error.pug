@@ -1,0 +1,10 @@
+http
+  head
+    include includes/head.pug
+    title NEXFI Docs - ERROR
+  body
+    div.container.mt-2
+      header 
+        h2 Error
+      section 
+        div.alert.alert-danger(role='alert') #{message}
