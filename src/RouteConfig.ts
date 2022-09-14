@@ -71,7 +71,11 @@ export async function parseRouteConfig(stream: Readable): Promise<RouteConfig> {
     throw new RouteConfigError('missing sites key')
   }
 
-  return new RouteConfig(parsed.version, parsed.sites)
+  return new RouteConfig(parsed.version, parsed.sites.map((s: any) => ({
+    domain: s.domain,
+    path: s.path || '',
+    project: s.project,
+  })))
 }
 
 export class RouteConfigError extends Error {}
