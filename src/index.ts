@@ -9,6 +9,8 @@ import { Readable } from 'stream'
 import initAuth from './auth'
 import { initAPI } from './api'
 import { ensureLoggedIn } from 'connect-ensure-login'
+import { EnvConfig, loadEnvConfig } from './EnvConfig'
+import { exit } from 'process'
 
 console.log('Docternal starting up...')
 
@@ -53,20 +55,24 @@ app.get('/', [ensureLoggedIn()], async (req: Request, res: Response) => {
   }
 })
 
-initAuth(app)
+let envConfig: EnvConfig
+try {
+  envConfig = loadEnvConfig()
+} catch (e) {
+  console.error(e)
+  exit(1)
+}
 
-const port = process.env.PORT || 8080
-const bucket = process.env.S3_BUCKET_NAME as string
-const rootPath = process.env.ROOT_DOCS_PATH || ''
+initAuth(app)
 
 const s3Client = new S3Client({});
 
-initAPI(app, s3Client, bucket, rootPath)
+initAPI(app, s3Client, envConfig.S3_BUCKET_NAME, envConfig.ROOT_DOCS_PATH)
 
 async function loadRouteConfig(): Promise<RouteConfig> {
   const ret = await s3Client.send(new GetObjectCommand({
-    Bucket: bucket,
-    Key: path.join(rootPath, 'docternal.yaml'),
+    Bucket: envConfig.S3_BUCKET_NAME,
+    Key: path.join(envConfig.ROOT_DOCS_PATH, 'docternal.yaml'),
   }))
   if (ret.Body) {
     return await parseRouteConfig(ret.Body as Readable)
@@ -99,7 +105,7 @@ app.get('/:lang/:version/*', [ensureLoggedIn()], async (req: Request, res: Respo
   }
 
   // Determine full path of resource inside S3
-  const resourcePath = path.join(rootPath, site.project, req.path)
+  const resourcePath = path.join(envConfig.ROOT_DOCS_PATH, site.project, req.path)
   if (path.extname(resourcePath) === '') {
     return res.redirect(path.join('/', req.path, 'index.html'))
   }
@@ -107,7 +113,7 @@ app.get('/:lang/:version/*', [ensureLoggedIn()], async (req: Request, res: Respo
   // Pipe resource from S3 to response
   try {
     const ret = await s3Client.send(new GetObjectCommand({
-      Bucket: bucket,
+      Bucket: envConfig.S3_BUCKET_NAME,
       Key: resourcePath,
     }))
     const body = ret.Body as Readable
@@ -120,6 +126,6 @@ app.get('/:lang/:version/*', [ensureLoggedIn()], async (req: Request, res: Respo
   }
 })
 
-app.listen(port, () => {
-  console.log(`Docternal listening on port ${port}`)
+app.listen(envConfig.PORT, () => {
+  console.log(`Docternal listening on port ${envConfig.PORT}`)
 })
