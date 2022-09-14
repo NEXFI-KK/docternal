@@ -1,7 +1,7 @@
-import { CommonPrefix, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
+import { CommonPrefix, GetObjectCommand, ListObjectsV2Command, NoSuchKey, S3Client } from '@aws-sdk/client-s3';
 import path from 'path';
 import { Readable } from 'stream';
-import { StorageAdapter } from './StorageAdapter'
+import { FileNotFound, StorageAdapter } from './StorageAdapter'
 
 /**
  * AWS S3 implementation of StorageAdapter interface.
@@ -29,7 +29,18 @@ export class S3StorageAdapter implements StorageAdapter {
     return ret.CommonPrefixes?.map((c: CommonPrefix) => path.basename(String(c.Prefix))) || []
   }
 
-  async openFile(path: string): Promise<Readable> {
-    throw new Error('Method not implemented.');
+  async openFile(fileName: string): Promise<Readable> {
+    try {
+      const ret = await this._s3Client.send(new GetObjectCommand({
+        Bucket: this._bucketName,
+        Key: fileName,
+      }))
+      return ret.Body as Readable
+    } catch (e) {
+      if (e instanceof NoSuchKey) {
+        throw new FileNotFound()
+      }
+      throw e
+    }
   }
 }
