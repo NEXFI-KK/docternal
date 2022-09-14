@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: NEXFI-KK/release-name-action@master
+      - uses: NEXFI-KK/release-name-action@v1
         id: release-name
         with:
           replace-refs: master=latest
