@@ -1,3 +1,6 @@
+import * as dotenv from 'dotenv'
+dotenv.config()
+
 import express, { Request, Response } from 'express'
 import session from 'express-session'
 import passport from 'passport'
@@ -53,6 +56,14 @@ app.get('/', [ensureLoggedIn()], async (req: Request, res: Response) => {
   try {
     routeConfig = await loadRouteConfig()
 
+    const currentSite = routeConfig.selectSite(req.hostname, req.path)
+    if (currentSite) {
+      return res.render('languages', {
+        project: currentSite.project,
+        languages: await storage.listSubdirs(path.join(envConfig.ROOT_DOCS_PATH, currentSite.project, '/')),
+      })
+    }
+
     return res.render('index', {
       sites: routeConfig.sites.map(site => ({
         title: site.project,
@@ -73,7 +84,28 @@ app.get('/', [ensureLoggedIn()], async (req: Request, res: Response) => {
   }
 })
 
-app.get('/:lang/:version/*', [ensureLoggedIn()], async (req: Request, res: Response) => {
+app.get('/:lang', [ensureLoggedIn()], async (req: Request, res: Response) => {
+  try {
+    const routeConfig = await loadRouteConfig()
+    const currentSite = routeConfig.selectSite(req.hostname, req.path)
+    if (currentSite) {
+      return res.render('versions', {
+        project: currentSite.project,
+        language: req.params.lang,
+        versions: await storage.listSubdirs(path.join(
+          envConfig.ROOT_DOCS_PATH,
+          currentSite.project,
+          req.params.lang,
+          '/',
+        )),
+      })
+    }
+  } catch (e: any) {
+    res.status(500).send(e.message)
+  }
+})
+
+app.get('/:lang/:version*', [ensureLoggedIn()], async (req: Request, res: Response) => {
   // Load route config on each request so it's always up to date
   let routeConfig: RouteConfig
   try {
@@ -91,7 +123,7 @@ app.get('/:lang/:version/*', [ensureLoggedIn()], async (req: Request, res: Respo
     return res.status(500).render('error', { message: e.stack })
   }
 
-  // TODO: Select site based on domain and path
+  // Select site based on domain and path
   const site = routeConfig.selectSite(req.hostname, req.path)
   if (!site) {
     return res.status(404).send('not found')
