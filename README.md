@@ -1,3 +1,6 @@
+![tests](https://github.com/NEXFI-KK/docternal/actions/workflows/test.yaml/badge.svg?branch=master)
+[![codecov](https://codecov.io/gh/NEXFI-KK/docternal/branch/master/graph/badge.svg?token=IZGQMYUM9E)](https://codecov.io/gh/NEXFI-KK/docternal)
+
 # Docternal (WIP)
 
 Docternal is an internal documentation hosting server for hosting internal/customer facing documentation.

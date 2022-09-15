@@ -1,0 +1,12 @@
+http
+  head
+    include includes/head.pug
+    title #{project} (#{language}) - Versions
+  body
+    div.container.mt-2
+      header 
+        h2 #{project} (#{language}) Versions
+      section
+        div.list-group
+          each version in versions
+            a.list-group-item.list-group-item-action(href=`${language}/${version}`) #{version}

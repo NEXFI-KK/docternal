@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
 
@@ -11,6 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - uses: NEXFI-KK/release-name-action@v1
+        id: release-name
+        with:
+          replace-refs: master=latest
 
       - name: Log in to the Container registry
         uses: docker/login-action@v2
@@ -25,4 +33,5 @@ jobs:
           context: ${{ github.workspace }}
           push: true
           tags: |
-            ghcr.io/nexfi-kk/docternal:latest
+            ghcr.io/nexfi-kk/docternal:${{ steps.release-name.outputs.name }}
+            ghcr.io/nexfi-kk/docternal:${{ github.sha }}
