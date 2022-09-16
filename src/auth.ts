@@ -5,6 +5,17 @@ import { IProfile, OIDCStrategy as MicrosoftStrategy, VerifyCallback } from 'pas
 import { Application, NextFunction, Request, Response } from 'express'
 import { EnvConfig } from './EnvConfig';
 
+/**
+ * User info type to be added to the request after logging in.
+ */
+type DocternalUser = {
+  id: string
+  name: string
+  email: string
+  domain: string
+  locale: string
+}
+
 passport.serializeUser((user, done) => {
   done(null, user);
 });
@@ -61,12 +72,14 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
       clientSecret: envConfig.GOOGLE_CLIENT_SECRET as string,
       callbackURL: envConfig.GOOGLE_CALLBACK_URL as string,
     }, (accessToken, refreshToken, profile, cb) => {
-      console.log('Signed in with Google account')
-      console.log(profile)
-      const user = {
+      if (!profile._json.email || !profile._json.hd) {
+        return cb(new Error('user has no email or domain'), undefined)
+      }
+      const user: DocternalUser = {
         id: profile.id,
         name: profile.displayName,
-        email: profile.emails ? profile.emails[0] : undefined,
+        email: profile._json.email,
+        domain: profile._json.hd,
         locale: profile._json.locale || 'en',
       }
       return cb(null, user)
@@ -84,7 +97,6 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
         } as any)(req, res, next)
       },
       (req, res) => {
-        console.log('login called')
         res.redirect('/')
       },
     )
@@ -99,7 +111,6 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
       },
       regenerateSessionAfterAuthentication,
       (req, res) => {
-        console.log('received final response from Azure')
         res.redirect('/')
       },
     )
@@ -111,16 +122,21 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
       responseMode: 'form_post',
       redirectUrl: envConfig.MICROSOFT_CALLBACK_URL,
       passReqToCallback: false,
-      scope: [ 'profile' ],
+      scope: [ 'profile', 'email' ],
     }, (iss: string, sub: string, profile: IProfile, done: VerifyCallback) => {
       if (!profile.oid) {
-        console.log('no oid found')
+        return done(new Error('user has no oid'), undefined)
       }
       console.log('Signed in with Microsoft account')
-      console.log(`iss: ${iss}`)
-      console.log(`sub: ${sub}`)
-      console.log('profile:', profile)
-      return done(null, { username: profile.name })
+      console.log(profile)
+      const user: DocternalUser = {
+        id: profile.oid,
+        name: profile.displayName || 'Unknown',
+        email: '',
+        domain: '',
+        locale: 'en',
+      }
+      return done(null, user)
     }))
   }
 }
