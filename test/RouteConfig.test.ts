@@ -1,5 +1,5 @@
 import { Readable } from 'stream'
-import { parseRouteConfig } from '../src/RouteConfig'
+import { parseRouteConfig, Site } from '../src/RouteConfig'
 
 describe('RouteConfig test', () => {
   it('should parse valid docternal.yaml', async () => {
@@ -11,16 +11,36 @@ describe('RouteConfig test', () => {
     expect(routeConfig.version).toBe(1)
     expect(routeConfig.sites).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
+        {
           project: 'cool-sdk',
           domain: 'cool-sdk.mycompany.com',
           path: '',
-        }),
-        expect.objectContaining({
+          permissions: new Map([
+            [
+              'google',
+              { domains: ['mycompany.com'], emails: ['contractor@devcompany.com'] },
+            ],
+            [
+              'microsoft',
+              { domains: ['favorite-partner.com'], emails: [] },
+            ],
+          ]),
+        },
+        {
           project: 'other-sdk',
           domain: 'docsite.com',
-          path: '/other-sdk'
-        }),
+          path: '/other-sdk',
+          permissions: new Map([
+            [
+              'google',
+              { domains: ['mycompany.com'], emails: [] },
+            ],
+            [
+              'local_users',
+              { domains: [], emails: ['user1', 'user2'] },
+            ],
+          ])
+        },
       ]))
   })
 })
@@ -34,7 +54,10 @@ sites:
     domain: cool-sdk.mycompany.com
     permissions:
       google:
-        domains: mycompany.com
+        domains:
+          - mycompany.com
+        emails:
+          - contractor@devcompany.com
       microsoft:
         domains: favorite-partner.com
 
@@ -44,8 +67,10 @@ sites:
     path: /other-sdk
     permissions:
       google:
-        domains: mycompany.com
-      basic_auth:
-        username: doc-viewer@dinosaur.com
-        password: <Bcrypt password hash>
+        domains:
+          - mycompany.com
+      local_users:
+        emails:
+          - user1
+          - user2
 `

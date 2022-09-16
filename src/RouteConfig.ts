@@ -1,4 +1,3 @@
-import { parse } from 'path'
 import { Readable } from 'stream'
 import YAML from 'yaml'
 
@@ -18,6 +17,18 @@ export type Site = {
    * Path where the project documentation will be available.
    */
   path: string
+  /**
+   * Viewing permissions for the specified site.
+   */
+  permissions: Map<string, SitePermissions>
+}
+
+/**
+ * Lists the domains and specific emails allowed to access the site.
+ */
+export type SitePermissions = {
+  domains: string[]
+  emails: string[]
 }
 
 /**
@@ -71,14 +82,35 @@ export async function parseRouteConfig(stream: Readable): Promise<RouteConfig> {
     throw new RouteConfigError('missing sites key')
   }
 
-  return new RouteConfig(parsed.version, parsed.sites.map((s: any) => ({
-    domain: s.domain,
-    path: s.path || '',
-    project: s.project,
-  })))
+  return new RouteConfig(parsed.version, parsed.sites.map((s: any): Site => {
+    const permissions = new Map<string, SitePermissions>()
+    for (const [k, v] of Object.entries(s)) {
+      permissions.set(k, {
+        domains: ensureArray((v as any).domains),
+        emails: ensureArray((v as any).emails),
+      })
+    }
+
+    return {
+      domain: s.domain,
+      path: s.path || '',
+      project: s.project,
+      permissions: permissions,
+    }
+  }))
 }
 
 export class RouteConfigError extends Error {}
+
+function ensureArray(val?: string | string[]): string[] {
+  if (Array.isArray(val)) {
+    return val
+  }
+  if (typeof val === 'string') {
+    return [val]
+  }
+  return []
+}
 
 async function streamToString (stream: Readable): Promise<string> {
   return await new Promise((resolve, reject) => {
