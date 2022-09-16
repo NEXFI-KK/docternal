@@ -20,7 +20,7 @@ export type Site = {
   /**
    * Viewing permissions for the specified site.
    */
-  permissions: Map<string, SitePermissions>
+  permissions: SitePermissions
 }
 
 /**
@@ -29,6 +29,7 @@ export type Site = {
 export type SitePermissions = {
   domains: string[]
   emails: string[]
+  localUsers: string[]
 }
 
 /**
@@ -64,6 +65,26 @@ export class RouteConfig {
     }
     return null
   }
+
+  /**
+   * Check if a user can access a specific site or not.
+   * @param email Email or local username of the user to check access for.
+   * @param site The site to check the user's access to.
+   */
+  static canAccess(email: string, site: Site): boolean {
+    if (site.permissions.emails.indexOf(email) !== -1) {
+      return true
+    }
+    if (site.permissions.localUsers.indexOf(email) !== -1) {
+      return true
+    }
+    for (const domain of site.permissions.domains) {
+      if (email.endsWith(domain)) {
+        return true
+      }
+    }
+    return false
+  }
 }
 
 /**
@@ -82,22 +103,16 @@ export async function parseRouteConfig(stream: Readable): Promise<RouteConfig> {
     throw new RouteConfigError('missing sites key')
   }
 
-  return new RouteConfig(parsed.version, parsed.sites.map((s: any): Site => {
-    const permissions = new Map<string, SitePermissions>()
-    for (const [k, v] of Object.entries(s)) {
-      permissions.set(k, {
-        domains: ensureArray((v as any).domains),
-        emails: ensureArray((v as any).emails),
-      })
-    }
-
-    return {
-      domain: s.domain,
-      path: s.path || '',
-      project: s.project,
-      permissions: permissions,
-    }
-  }))
+  return new RouteConfig(parsed.version, parsed.sites.map((s: any): Site => ({
+    domain: s.domain,
+    path: s.path || '',
+    project: s.project,
+    permissions: {
+      domains: ensureArray(s.permissions?.domains),
+      emails: ensureArray(s.permissions?.emails),
+      localUsers: ensureArray(s.permissions?.local_users),
+    },
+  })))
 }
 
 export class RouteConfigError extends Error {}

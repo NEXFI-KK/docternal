@@ -8,7 +8,7 @@ import { EnvConfig } from './EnvConfig';
 /**
  * User info type to be added to the request after logging in.
  */
-type DocternalUser = {
+export type DocternalUser = {
   id: string
   name: string
   email: string

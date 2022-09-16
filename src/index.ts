@@ -7,7 +7,7 @@ import passport from 'passport'
 import cookieParser from 'cookie-parser'
 import path from 'path'
 import { parseRouteConfig, RouteConfig, RouteConfigError } from './RouteConfig'
-import initAuth from './auth'
+import initAuth, { DocternalUser } from './auth'
 import { initAPI } from './api'
 import { ensureLoggedIn } from 'connect-ensure-login'
 import { EnvConfig, loadEnvConfig } from './EnvConfig'
@@ -127,6 +127,12 @@ app.get('/:lang/:version*', [ensureLoggedIn()], async (req: Request, res: Respon
   const site = routeConfig.selectSite(req.hostname, req.path)
   if (!site) {
     return res.status(404).send('not found')
+  }
+
+  // Reject users who shouldn't view the docs
+  const user = req.user as DocternalUser
+  if (!RouteConfig.canAccess(user.email, site)) {
+    return res.status(401).send('unauthorized')
   }
 
   // Determine full path of resource inside S3
