@@ -127,14 +127,15 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
       if (!profile.oid) {
         return done(new Error('user has no oid'), undefined)
       }
-      console.log('Signed in with Microsoft account')
-      console.log(profile)
+      if (!profile._json.email || !profile._json.hd) {
+        return done(new Error('user has no email or domain'), undefined)
+      }
       const user: DocternalUser = {
         id: profile.oid,
-        name: profile.displayName || 'Unknown',
-        email: '',
-        domain: '',
-        locale: 'en',
+        name: profile.displayName || 'anonymous',
+        email: profile._json.email,
+        domain: profile._json.hd,
+        locale: profile._json.locale || 'en',
       }
       return done(null, user)
     }))
