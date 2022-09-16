@@ -124,6 +124,8 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
       passReqToCallback: false,
       scope: [ 'profile', 'email' ],
     }, (iss: string, sub: string, profile: IProfile, done: VerifyCallback) => {
+      console.log('Logged in with Microsoft')
+      console.log(profile)
       if (!profile.oid) {
         return done(new Error('user has no oid'), undefined)
       }
