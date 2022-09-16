@@ -129,15 +129,16 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
       if (!profile.oid) {
         return done(new Error('user has no oid'), undefined)
       }
-      if (!profile._json.email || !profile._json.hd) {
-        return done(new Error('user has no email or domain'), undefined)
+      if (!profile._json.email) {
+        return done(new Error('user has no email'), undefined)
       }
+      const email = profile._json.email as string
       const user: DocternalUser = {
         id: profile.oid,
         name: profile.displayName || 'anonymous',
-        email: profile._json.email,
-        domain: profile._json.hd,
-        locale: profile._json.locale || 'en',
+        email: email,
+        domain: email.split('@')[1],
+        locale: 'en',
       }
       return done(null, user)
     }))
