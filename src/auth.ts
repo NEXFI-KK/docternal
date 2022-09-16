@@ -62,12 +62,13 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
       callbackURL: envConfig.GOOGLE_CALLBACK_URL as string,
     }, (accessToken, refreshToken, profile, cb) => {
       console.log('Signed in with Google account')
+      console.log(profile)
       const user = {
         id: profile.id,
         name: profile.displayName,
+        email: profile.emails ? profile.emails[0] : undefined,
         locale: profile._json.locale || 'en',
       }
-      console.log('profile:', user)
       return cb(null, user)
     }))
   }
