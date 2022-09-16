@@ -5,18 +5,28 @@ http
   body
     div.container.mt-2
       header 
-        h2 Login
+        h2 NEXFI Docs - Login
       section
         if withLocalLogin
           form(action='/login/password' method='POST')
             div.mb-3
               label.form-label Username
-              input.form-control(name='username' type='text')
+              input.form-control.form-control-lg(name='username' type='text')
             div.mb-3
               label.form-label Password
-              input.form-control(name='password' type='password')
-            button.btn.btn-primary(type='submit') Login
-        if withGoogleLogin
-          a(href='/auth/google') Login with Google
+              input.form-control.form-control-lg(name='password' type='password')
+            div.d-grid.gap-2
+              button.btn.btn-primary.btn-lg(type='submit') Login
+        div.divider.d-flex.align-items-center.my-4
+          p.text-center.fw-bold.mx-3.mb-0.text-muted OR
+        div.d-grid.gap-2
+          if withGoogleLogin
+            a.btn.btn-outline-danger.btn-lg(href='/auth/google')
+              i.bi.bi-google.me-2
+              span Login with Google
+          if withMicrosoftLogin
+            a.btn.btn-outline-success.btn-lg(href='/auth/microsoft')
+              i.bi.bi-microsoft.me-2
+              span Login with Microsoft
 
 

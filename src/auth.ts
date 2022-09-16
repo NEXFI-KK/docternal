@@ -28,6 +28,7 @@ export default function initAuth(app: Application) {
     res.render('login', {
       withLocalLogin: !!process.env.LOCAL_USERS,
       withGoogleLogin: !!process.env.GOOGLE_CLIENT_ID,
+      withMicrosoftLogin: true,
     })
   })
 
