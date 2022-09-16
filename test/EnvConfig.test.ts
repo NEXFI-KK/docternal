@@ -57,6 +57,8 @@ describe('EnvConfig test', () => {
       GOOGLE_CLIENT_ID: '',
       GOOGLE_CLIENT_SECRET: '',
       GOOGLE_CALLBACK_URL: '',
+      MICROSOFT_CLIENT_ID: '',
+      MICROSOFT_CALLBACK_URL: '',
     })
   })
   it('parses valid environment config and overrides defaults', () => {
@@ -70,6 +72,8 @@ describe('EnvConfig test', () => {
       GOOGLE_CLIENT_ID: '1234567890',
       GOOGLE_CLIENT_SECRET: 'abcdefghijklmnopqrstuvwxyz',
       GOOGLE_CALLBACK_URL: 'https://mydocsite.com/auth/google/callback',
+      MICROSOFT_CLIENT_ID: '1234567890',
+      MICROSOFT_CALLBACK_URL: 'https://mydocsite.com/auth/microsoft/callback',
     })
     expect(config).toEqual({
       PORT: 3000,
@@ -91,6 +95,8 @@ describe('EnvConfig test', () => {
       GOOGLE_CLIENT_ID: '1234567890',
       GOOGLE_CLIENT_SECRET: 'abcdefghijklmnopqrstuvwxyz',
       GOOGLE_CALLBACK_URL: 'https://mydocsite.com/auth/google/callback',
+      MICROSOFT_CLIENT_ID: '1234567890',
+      MICROSOFT_CALLBACK_URL: 'https://mydocsite.com/auth/microsoft/callback',
     })
   })
   it('throws error when missing required settings', () => {
