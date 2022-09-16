@@ -61,6 +61,8 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
       clientSecret: envConfig.GOOGLE_CLIENT_SECRET as string,
       callbackURL: envConfig.GOOGLE_CALLBACK_URL as string,
     }, (accessToken, refreshToken, profile, cb) => {
+      console.log('Signed in with Google account')
+      console.log('profile:', profile)
       return cb(null, profile)
     }))
   }
@@ -105,8 +107,12 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
       passReqToCallback: false,
     }, (iss: string, sub: string, profile: IProfile, done: VerifyCallback) => {
       if (!profile.oid) {
-        return done(new Error('no oid found'), null)
+        console.log('no oid found')
       }
+      console.log('Signed in with Microsoft account')
+      console.log(`iss: ${iss}`)
+      console.log(`sub: ${sub}`)
+      console.log('profile:', profile)
       return done(null, { username: profile.name })
     }))
   }
