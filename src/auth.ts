@@ -1,7 +1,7 @@
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
-import { OIDCStrategy as MicrosoftStrategy, VerifyCallback } from 'passport-azure-ad'
+import { IProfile, OIDCStrategy as MicrosoftStrategy, VerifyCallback } from 'passport-azure-ad'
 import { Application, NextFunction, Request, Response } from 'express'
 import { EnvConfig } from './EnvConfig';
 
@@ -103,7 +103,13 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
       responseMode: 'form_post',
       redirectUrl: envConfig.MICROSOFT_CALLBACK_URL,
       passReqToCallback: false,
-    }, (iss: string, sub: string, done: VerifyCallback) => { return done(null, { username: 'test' }) }))
+      validateIssuer: false,
+    }, (iss: string, sub: string, profile: IProfile, done: VerifyCallback) => {
+      if (!profile.oid) {
+        return done(new Error('no oid found'), null)
+      }
+      return done(null, { username: profile.name })
+    }))
   }
 }
 
