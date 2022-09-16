@@ -7,7 +7,7 @@ on:
   pull_request:
     branches:
       - master
-      - '!dependabot/**''
+      - '!dependabot/**'
 
 jobs:
 
