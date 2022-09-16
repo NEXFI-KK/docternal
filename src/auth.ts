@@ -111,6 +111,7 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
       responseMode: 'form_post',
       redirectUrl: envConfig.MICROSOFT_CALLBACK_URL,
       passReqToCallback: false,
+      scope: [ 'profile' ],
     }, (iss: string, sub: string, profile: IProfile, done: VerifyCallback) => {
       if (!profile.oid) {
         console.log('no oid found')
