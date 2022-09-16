@@ -50,7 +50,7 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
 
   // Google OAuth 2.0 login
   if (envConfig.GOOGLE_CLIENT_ID) {
-    app.get('/auth/google', passport.authenticate('google', { scope: ['profile'] }))
+    app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
 
     app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
       res.redirect('/')
@@ -62,8 +62,13 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
       callbackURL: envConfig.GOOGLE_CALLBACK_URL as string,
     }, (accessToken, refreshToken, profile, cb) => {
       console.log('Signed in with Google account')
-      console.log('profile:', profile)
-      return cb(null, profile)
+      const user = {
+        id: profile.id,
+        name: profile.displayName,
+        locale: profile._json.locale || 'en',
+      }
+      console.log('profile:', user)
+      return cb(null, user)
     }))
   }
 
