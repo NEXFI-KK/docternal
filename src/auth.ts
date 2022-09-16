@@ -69,17 +69,29 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
   if (envConfig.MICROSOFT_CLIENT_ID) {
     app.get(
       '/auth/microsoft',
-      passport.authenticate('azuread-openidconnect', { failureRedirect: '/login' }),
+      (req, res, next) => {
+        passport.authenticate('azuread-openidconnect', {
+          response: res,
+          failureRedirect: '/login',
+        } as any)(req, res, next)
+      },
       (req, res) => {
+        console.log('login called')
         res.redirect('/')
       },
     )
 
-    app.get(
+    app.post(
       '/auth/microsoft/callback',
-      passport.authenticate('azuread-openidconnect', { failureRedirect: '/login' }),
+      (req, res, next) => {
+        passport.authenticate('azuread-openidconnect', {
+          response: res,
+          failureRedirect: '/login',
+        } as any)(req, res, next)
+      },
       regenerateSessionAfterAuthentication,
       (req, res) => {
+        console.log('received final response from Azure')
         res.redirect('/')
       },
     )
@@ -91,7 +103,7 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
       responseMode: 'form_post',
       redirectUrl: envConfig.MICROSOFT_CALLBACK_URL,
       passReqToCallback: false,
-    }, (iss: string, sub: string, done: VerifyCallback) => { return done(null, {}) }))
+    }, (iss: string, sub: string, done: VerifyCallback) => { return done(null, { username: 'test' }) }))
   }
 }
 
