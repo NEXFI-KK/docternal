@@ -51,6 +51,10 @@ export type EnvConfig = {
    */
   MICROSOFT_CLIENT_ID: string
   /**
+   * Azure Active Directory AD tenant name if using Microsoft login.
+   */
+  MICROSOFT_AD_TENANT_NAME: string
+  /**
    * Azure Active Directory OAuth callback if using Microsoft login.
    * Should be `https://{your_domain}/auth/microsoft/callback` in most cases.
    */
@@ -82,6 +86,7 @@ export function loadEnvConfig(env?: NodeJS.ProcessEnv): EnvConfig {
     GOOGLE_CLIENT_SECRET: env.GOOGLE_CLIENT_SECRET || '',
     GOOGLE_CALLBACK_URL: env.GOOGLE_CALLBACK_URL || '',
     MICROSOFT_CLIENT_ID: env.MICROSOFT_CLIENT_ID || '',
+    MICROSOFT_AD_TENANT_NAME: env.MICROSOFT_AD_TENANT_NAME || '',
     MICROSOFT_CALLBACK_URL: env.MICROSOFT_CALLBACK_URL || '',
   }
 }

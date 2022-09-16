@@ -99,7 +99,7 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
     )
 
     passport.use(new MicrosoftStrategy({
-      identityMetadata: 'https://login.microsoftonline.com/tannernexfikk.onmicrosoft.com/v2.0/.well-known/openid-configuration',
+      identityMetadata: `https://login.microsoftonline.com/${envConfig.MICROSOFT_AD_TENANT_NAME}/v2.0/.well-known/openid-configuration`,
       clientID: envConfig.MICROSOFT_CLIENT_ID,
       responseType: 'id_token',
       responseMode: 'form_post',

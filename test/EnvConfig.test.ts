@@ -58,6 +58,7 @@ describe('EnvConfig test', () => {
       GOOGLE_CLIENT_SECRET: '',
       GOOGLE_CALLBACK_URL: '',
       MICROSOFT_CLIENT_ID: '',
+      MICROSOFT_AD_TENANT_NAME: '',
       MICROSOFT_CALLBACK_URL: '',
     })
   })
@@ -73,6 +74,7 @@ describe('EnvConfig test', () => {
       GOOGLE_CLIENT_SECRET: 'abcdefghijklmnopqrstuvwxyz',
       GOOGLE_CALLBACK_URL: 'https://mydocsite.com/auth/google/callback',
       MICROSOFT_CLIENT_ID: '1234567890',
+      MICROSOFT_AD_TENANT_NAME: 'tenant-name',
       MICROSOFT_CALLBACK_URL: 'https://mydocsite.com/auth/microsoft/callback',
     })
     expect(config).toEqual({
@@ -96,6 +98,7 @@ describe('EnvConfig test', () => {
       GOOGLE_CLIENT_SECRET: 'abcdefghijklmnopqrstuvwxyz',
       GOOGLE_CALLBACK_URL: 'https://mydocsite.com/auth/google/callback',
       MICROSOFT_CLIENT_ID: '1234567890',
+      MICROSOFT_AD_TENANT_NAME: 'tenant-name',
       MICROSOFT_CALLBACK_URL: 'https://mydocsite.com/auth/microsoft/callback',
     })
   })
