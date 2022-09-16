@@ -2,7 +2,7 @@ import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 import { OIDCStrategy as MicrosoftStrategy, VerifyCallback } from 'passport-azure-ad'
-import { Application } from 'express'
+import { Application, NextFunction, Request, Response } from 'express'
 import { EnvConfig } from './EnvConfig';
 
 passport.serializeUser((user, done) => {
@@ -67,11 +67,22 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
 
   // Microsoft OAuth 2.0 login
   if (envConfig.MICROSOFT_CLIENT_ID) {
-    app.get('/auth/microsoft', passport.authenticate('azuread-openidconnect', {}))
+    app.get(
+      '/auth/microsoft',
+      passport.authenticate('azuread-openidconnect', { failureRedirect: '/login' }),
+      (req, res) => {
+        res.redirect('/')
+      },
+    )
 
-    app.get('/auth/microsoft', passport.authenticate('azuread-openidconnect', { failureRedirect: '/login' }), (req, res) => {
-      res.redirect('/')
-    })
+    app.get(
+      '/auth/microsoft/callback',
+      passport.authenticate('azuread-openidconnect', { failureRedirect: '/login' }),
+      regenerateSessionAfterAuthentication,
+      (req, res) => {
+        res.redirect('/')
+      },
+    )
 
     passport.use(new MicrosoftStrategy({
       identityMetadata: 'https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration',
@@ -82,4 +93,15 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
       passReqToCallback: false,
     }, (iss: string, sub: string, done: VerifyCallback) => { return done(null, {}) }))
   }
+}
+
+function regenerateSessionAfterAuthentication(req: Request, res: Response, next: NextFunction) {
+  let passportInstance = (req.session as any).passport;
+  return req.session.regenerate(function (err){
+    if (err) {
+      return next(err);
+    }
+    (req.session as any).passport = passportInstance;
+    return req.session.save(next);
+  });
 }
