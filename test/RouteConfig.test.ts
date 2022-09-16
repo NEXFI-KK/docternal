@@ -1,5 +1,5 @@
 import { Readable } from 'stream'
-import { parseRouteConfig } from '../src/RouteConfig'
+import { parseRouteConfig, RouteConfig, Site } from '../src/RouteConfig'
 
 describe('RouteConfig test', () => {
   it('should parse valid docternal.yaml', async () => {
@@ -11,17 +11,75 @@ describe('RouteConfig test', () => {
     expect(routeConfig.version).toBe(1)
     expect(routeConfig.sites).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
+        {
           project: 'cool-sdk',
           domain: 'cool-sdk.mycompany.com',
           path: '',
-        }),
-        expect.objectContaining({
+          permissions: {
+            domains: ['mycompany.com'],
+            emails: ['contractor@devcompany.com'],
+            localUsers: [],
+          },
+        },
+        {
           project: 'other-sdk',
           domain: 'docsite.com',
-          path: '/other-sdk'
-        }),
+          path: '/other-sdk',
+          permissions: {
+            domains:['mycompany.com'],
+            emails: [],
+            localUsers: ['user1', 'user2'],
+          }
+        },
       ]))
+  })
+  it('should authorize users by email', () => {
+    expect(RouteConfig.canAccess('steve@company.com', {
+      domain: 'docs.company.com',
+      project: 'company-docs',
+      path: '',
+      permissions: {
+        domains: [],
+        emails: ['steve@company.com'],
+        localUsers: [],
+      }
+    })).toBe(true)
+  })
+  it('should authorize users by local username', () => {
+    expect(RouteConfig.canAccess('local_user_1', {
+      domain: 'docs.company.com',
+      project: 'company-docs',
+      path: '',
+      permissions: {
+        domains: [],
+        emails: [],
+        localUsers: ['local_user_1'],
+      }
+    })).toBe(true)
+  })
+  it('should authorize users by email domain', () => {
+    expect(RouteConfig.canAccess('steve@company.com', {
+      domain: 'docs.company.com',
+      project: 'company-docs',
+      path: '',
+      permissions: {
+        domains: ['company.com'],
+        emails: [],
+        localUsers: [],
+      }
+    })).toBe(true)
+  })
+  it('should reject unauthorized users', () => {
+    expect(RouteConfig.canAccess('bob@organization.org', {
+      domain: 'docs.company.com',
+      project: 'company-docs',
+      path: '',
+      permissions: {
+        domains: ['company.com'],
+        emails: [],
+        localUsers: [],
+      }
+    })).toBe(false)
   })
 })
 
@@ -33,19 +91,19 @@ sites:
   - project: cool-sdk
     domain: cool-sdk.mycompany.com
     permissions:
-      google:
-        domains: mycompany.com
-      microsoft:
-        domains: favorite-partner.com
+      domains:
+        - mycompany.com
+      emails:
+        - contractor@devcompany.com
 
   # docsite.com/other-sdk/en/latest
   - project: other-sdk
     domain: docsite.com
     path: /other-sdk
     permissions:
-      google:
-        domains: mycompany.com
-      basic_auth:
-        username: doc-viewer@dinosaur.com
-        password: <Bcrypt password hash>
+      domains:
+        - mycompany.com
+      local_users:
+        - user1
+        - user2
 `
