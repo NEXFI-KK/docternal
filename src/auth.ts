@@ -97,13 +97,12 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
     )
 
     passport.use(new MicrosoftStrategy({
-      identityMetadata: 'https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration',
+      identityMetadata: 'https://login.microsoftonline.com/tannernexfikk.onmicrosoft.com/v2.0/.well-known/openid-configuration',
       clientID: envConfig.MICROSOFT_CLIENT_ID,
       responseType: 'id_token',
       responseMode: 'form_post',
       redirectUrl: envConfig.MICROSOFT_CALLBACK_URL,
       passReqToCallback: false,
-      validateIssuer: false,
     }, (iss: string, sub: string, profile: IProfile, done: VerifyCallback) => {
       if (!profile.oid) {
         return done(new Error('no oid found'), null)
