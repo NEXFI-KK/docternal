@@ -43,7 +43,7 @@ try {
 
 const storage = new S3StorageAdapter(envConfig.S3_BUCKET_NAME)
 
-initAuth(app)
+initAuth(app, envConfig)
 initAPI(app, storage, envConfig)
 
 async function loadRouteConfig(): Promise<RouteConfig> {

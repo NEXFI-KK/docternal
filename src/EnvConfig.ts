@@ -46,6 +46,15 @@ export type EnvConfig = {
    * Should be `https://{your_domain}/auth/google/callback` in most cases.
    */
   GOOGLE_CALLBACK_URL: string
+  /**
+   * Azure Active Directory OAuth client ID if using Microsoft login.
+   */
+  MICROSOFT_CLIENT_ID: string
+  /**
+   * Azure Active Directory OAuth callback if using Microsoft login.
+   * Should be `https://{your_domain}/auth/microsoft/callback` in most cases.
+   */
+  MICROSOFT_CALLBACK_URL: string
 }
 
 export type LocalUser = {
@@ -72,6 +81,8 @@ export function loadEnvConfig(env?: NodeJS.ProcessEnv): EnvConfig {
     GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID || '',
     GOOGLE_CLIENT_SECRET: env.GOOGLE_CLIENT_SECRET || '',
     GOOGLE_CALLBACK_URL: env.GOOGLE_CALLBACK_URL || '',
+    MICROSOFT_CLIENT_ID: env.MICROSOFT_CLIENT_ID || '',
+    MICROSOFT_CALLBACK_URL: env.MICROSOFT_CALLBACK_URL || '',
   }
 }
 

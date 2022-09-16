@@ -1,7 +1,9 @@
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
+import { OIDCStrategy as MicrosoftStrategy, VerifyCallback } from 'passport-azure-ad'
 import { Application } from 'express'
+import { EnvConfig } from './EnvConfig';
 
 passport.serializeUser((user, done) => {
   done(null, user);
@@ -22,13 +24,13 @@ passport.use(new LocalStrategy((username, password, cb) => {
  * Initialize the app's authentication functions.
  * @param app Express application to register routes on.
  */
-export default function initAuth(app: Application) {
+export default function initAuth(app: Application, envConfig: EnvConfig) {
   // Local username/password auth
   app.get('/login', (req, res) => {
     res.render('login', {
-      withLocalLogin: !!process.env.LOCAL_USERS,
-      withGoogleLogin: !!process.env.GOOGLE_CLIENT_ID,
-      withMicrosoftLogin: true,
+      withLocalLogin: !!envConfig.LOCAL_USERS,
+      withGoogleLogin: !!envConfig.GOOGLE_CLIENT_ID,
+      withMicrosoftLogin: !!envConfig.MICROSOFT_CLIENT_ID,
     })
   })
 
@@ -47,7 +49,7 @@ export default function initAuth(app: Application) {
   }))
 
   // Google OAuth 2.0 login
-  if (process.env.GOOGLE_CLIENT_ID) {
+  if (envConfig.GOOGLE_CLIENT_ID) {
     app.get('/auth/google', passport.authenticate('google', { scope: ['profile'] }))
 
     app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
@@ -55,11 +57,29 @@ export default function initAuth(app: Application) {
     })
 
     passport.use(new GoogleStrategy({
-      clientID: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL as string,
+      clientID: envConfig.GOOGLE_CLIENT_ID as string,
+      clientSecret: envConfig.GOOGLE_CLIENT_SECRET as string,
+      callbackURL: envConfig.GOOGLE_CALLBACK_URL as string,
     }, (accessToken, refreshToken, profile, cb) => {
       return cb(null, profile)
     }))
+  }
+
+  // Microsoft OAuth 2.0 login
+  if (envConfig.MICROSOFT_CLIENT_ID) {
+    app.get('/auth/microsoft', passport.authenticate('azuread-openidconnect', {}))
+
+    app.get('/auth/microsoft', passport.authenticate('azuread-openidconnect', { failureRedirect: '/login' }), (req, res) => {
+      res.redirect('/')
+    })
+
+    passport.use(new MicrosoftStrategy({
+      identityMetadata: 'https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration',
+      clientID: envConfig.MICROSOFT_CLIENT_ID,
+      responseType: 'id_token',
+      responseMode: 'form_post',
+      redirectUrl: envConfig.MICROSOFT_CALLBACK_URL,
+      passReqToCallback: false,
+    }, (iss: string, sub: string, done: VerifyCallback) => { return done(null, {}) }))
   }
 }
