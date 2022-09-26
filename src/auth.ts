@@ -3,7 +3,8 @@ import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20'
 import { IProfile, OIDCStrategy as MicrosoftStrategy, VerifyCallback } from 'passport-azure-ad'
 import { Application, NextFunction, Request, Response } from 'express'
-import { EnvConfig } from './EnvConfig';
+import { EnvConfig } from './EnvConfig'
+import { timingSafeEqual } from 'crypto'
 
 /**
  * User info type to be added to the request after logging in.
@@ -17,19 +18,12 @@ export type DocternalUser = {
 }
 
 passport.serializeUser((user, done) => {
-  done(null, user);
+  done(null, user)
 });
 
 passport.deserializeUser((obj: Express.User, done) => {
-  done(null, obj);
+  done(null, obj)
 });
-
-passport.use(new LocalStrategy((username, password, cb) => {
-  if (username === 'test' && password === 'test') {
-    return cb(null, { username: 'test' })
-  }
-  return cb(null, false, { message: 'Incorrect username or password' })
-}))
 
 /**
  * Initialize the app's authentication functions.
@@ -37,6 +31,24 @@ passport.use(new LocalStrategy((username, password, cb) => {
  */
 export default function initAuth(app: Application, envConfig: EnvConfig) {
   // Local username/password auth
+  passport.use(new LocalStrategy((username, password, cb) => {
+    for (const user of envConfig.LOCAL_USERS) {
+      const usernameCorrect = timingSafeEqual(Buffer.from(username), Buffer.from(user.username))
+      const passwordCorrect = timingSafeEqual(Buffer.from(password), Buffer.from(user.password))
+      if (usernameCorrect && passwordCorrect) {
+        const user: DocternalUser = {
+          id: 'anonymous',
+          name: username,
+          email: username,
+          domain: 'local_user',
+          locale: 'en',
+        }
+        return cb(null, { username: username })
+      }
+    }
+    return cb(null, false, { message: 'Incorrect username or password' })
+  }))
+
   app.get('/login', (req, res) => {
     res.render('login', {
       withLocalLogin: !!envConfig.LOCAL_USERS,
