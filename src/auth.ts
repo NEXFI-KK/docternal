@@ -43,7 +43,7 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
           domain: 'local_user',
           locale: 'en',
         }
-        return cb(null, { username: username })
+        return cb(null, user)
       }
     }
     return cb(null, false, { message: 'Incorrect username or password' })
