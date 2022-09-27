@@ -33,8 +33,12 @@ export default function initAuth(app: Application, envConfig: EnvConfig) {
   // Local username/password auth
   passport.use(new LocalStrategy((username, password, cb) => {
     for (const user of envConfig.LOCAL_USERS) {
-      const usernameCorrect = timingSafeEqual(Buffer.from(username), Buffer.from(user.username))
-      const passwordCorrect = timingSafeEqual(Buffer.from(password), Buffer.from(user.password))
+      const usernameCorrect = username === user.username
+
+      const pwA = Buffer.from(password)
+      const pwB = Buffer.from(user.password)
+      const passwordCorrect = pwA.length == pwB.length &&  timingSafeEqual(pwA, pwB)
+
       if (usernameCorrect && passwordCorrect) {
         const user: DocternalUser = {
           id: 'anonymous',
