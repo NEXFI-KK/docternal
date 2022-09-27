@@ -4,16 +4,15 @@ on:
   push:
     branches:
       - master
-      - '!dependabot/**'
   pull_request:
     branches:
       - master
-      - '!dependabot/**'
 
 jobs:
 
   build:
     runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
       - uses: actions/checkout@v3
 
