@@ -38,21 +38,22 @@ sites:
   - project: cool-sdk
     domain: cool-sdk.mycompany.com
     permissions:
-      google:
-        domains: mycompany.com
-      microsoft:
-        domains: favorite-partner.com
+      domains:
+        - mycompany.com
+        - favorite-partner.com
 
   # docsite.com/other-sdk/en/latest
   - project: other-sdk
     domain: docsite.com
     path: /other-sdk
     permissions:
-      google:
-        domains: mycompany.com
-      basic_auth:
-        username: doc-viewer@dinosaur.com
-        password: <Bcrypt password hash>
+      domains:
+        - mycompany.com
+      emails:
+        - steve@favorite-partner.com
+      local_users:
+        - local_user_1
+        - bob@some-company.com
 
 ```
 
