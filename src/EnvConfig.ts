@@ -1,5 +1,3 @@
-import { stringify } from "querystring"
-
 /**
  * Configuration loaded from environment variables.
  */
